@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auction Items</title>
+</head>
+<body>
+    <h1>Auction Items</h1>
+    <div id="items">
+        <!-- Items will be dynamically loaded here -->
+    </div>
+    <script>
+        // Fetch auction items from the backend
+        fetch('/api/items')
+            .then(response => response.json())
+            .then(data => {
+                const itemsContainer = document.getElementById('items');
+                data.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.innerHTML = `
+                        <h2>${item.name}</h2>
+                        <p>Starting Bid: $${item.startingBid}</p>
+                        <p>Current Highest Bid: $${item.highestBid || item.startingBid}</p>
+                        <button onclick="placeBid('${item.id}')">Place Bid</button>
+                    `;
+                    itemsContainer.appendChild(itemDiv);
+                });
+            });
+
+        function placeBid(itemId) {
+            const bid = prompt('Enter your bid amount:');
+            fetch('/api/bid', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ itemId, bid: Number(bid) }),
+            })
+                .then(response => response.json())
+                .then(result => alert(result.message))
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
